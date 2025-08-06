@@ -1,6 +1,4 @@
-import React from 'react'
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Step1Personal from './Step1personal';
 import Step2Location from './Step2Location';
 import Step3Employment from './Step3Employment';
@@ -8,6 +6,7 @@ import Step4Interests from './Step4Interests';
 
 export default function Onboarding() {
   const [step, setStep] = useState(1);
+
   const [formData, setFormData] = useState({
     fullName: '',
     dob: '',
@@ -41,10 +40,11 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen bg-blue-50 flex items-center justify-center px-4 py-8">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-xl space-y-6">
-        <h2 className="text-xl font-bold text-center text-blue-700">📋 Profile Setup ({step}/4)</h2>
+        <h2 className="text-xl font-bold text-center text-blue-700">
+          📋 Profile Setup ({step}/4)
+        </h2>
         {steps[step]}
       </div>
     </div>
   );
 }
-

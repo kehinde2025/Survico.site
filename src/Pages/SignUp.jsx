@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
-import { auth, provider } from '../firebase'; // ✅ correct path!
+import { auth, provider } from '../firebase'; // ✅ correct path
 import { signInWithPopup } from 'firebase/auth';
-
+import axios from 'axios';
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -17,6 +16,7 @@ export default function SignUp() {
   });
 
   const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState('');
 
   useEffect(() => {
     const ref = new URLSearchParams(window.location.search).get('ref');
@@ -41,34 +41,53 @@ export default function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setApiError('');
     if (!validate()) return;
 
     try {
-      const res = await api.post('/auth/register', {
+      const res = await axios.post('http://localhost:5000/api/auth/register', {
         name: formData.fullName,
         email: formData.email,
         password: formData.password,
         phone: formData.phoneNumber,
-        referrerId: formData.referrerId,
+        referrerId: formData.referrerId || null, // ✅ fallback to null if not provided
       });
-      console.log('✅ Registration successful:', res.data);
+
+      console.log('✅ Registration success:', res.data);
+
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+
       navigate('/onboarding');
     } catch (err) {
       console.error(err);
-      setErrors({ api: err.response?.data?.message || 'Server error' });
+      setApiError(err.response?.data?.message || 'Server error');
     }
   };
 
-  const handleGoogleSignIn = () => {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const user = result.user;
-        console.log('✅ Google User:', user);
-        // TODO: send user info to your backend if needed
-      })
-      .catch((error) => {
-        console.error('❌ Google Sign-In error:', error);
+  const handleGoogleSignIn = async () => {
+    setApiError('');
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      console.log('✅ Google Firebase User:', user);
+
+      const res = await axios.post('http://localhost:5000/api/auth/google', {
+        name: user.displayName,
+        email: user.email,
       });
+
+      console.log('✅ Google backend success:', res.data);
+
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+
+      navigate('/onboarding');
+    } catch (error) {
+      console.error('❌ Google Sign-In error:', error);
+      setApiError('Google Sign-In failed. Please try again.');
+    }
   };
 
 
@@ -79,8 +98,8 @@ export default function SignUp() {
           Create Your Survico Account
         </h2>
 
-        {errors.api && (
-          <p className="text-sm text-red-500 mb-2 text-center">{errors.api}</p>
+        {apiError && (
+          <p className="text-sm text-red-500 mb-2 text-center">{apiError}</p>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -141,7 +160,6 @@ export default function SignUp() {
         >
           Sign Up with Google
         </button>
-
 
         <p className="text-sm text-center mt-4">
           Already have an account?{' '}

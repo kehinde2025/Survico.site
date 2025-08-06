@@ -1,11 +1,11 @@
 // src/Pages/inspector/InspectorProfile.jsx
 import { useState } from 'react';
 
-export default function InspectorProfile() {
-  // Dummy inspector profile info
-  const [inspector, setInspector] = useState({
-    name: 'Inspector Joe',
-    email: 'inspector@gmail.com',
+export default function SpectatorProfile() {
+  // Dummy spectator profile info
+  const [spectator, setSpectator] = useState({
+    name: 'Spectator Joe',
+    email: 'spectator@gmail.com',
     status: 'Active',
   });
 
@@ -16,18 +16,18 @@ export default function InspectorProfile() {
       <div className="bg-white p-6 rounded shadow space-y-4">
         <div>
           <label className="block text-sm text-gray-500">Name</label>
-          <p className="text-lg font-medium">{inspector.name}</p>
+          <p className="text-lg font-medium">{spectator.name}</p>
         </div>
 
         <div>
           <label className="block text-sm text-gray-500">Email</label>
-          <p className="text-lg font-medium">{inspector.email}</p>
+          <p className="text-lg font-medium">{spectator.email}</p>
         </div>
 
         <div>
           <label className="block text-sm text-gray-500">Status</label>
-          <p className={`text-lg font-medium ${inspector.status === 'Active' ? 'text-green-600' : 'text-red-600'}`}>
-            {inspector.status}
+          <p className={`text-lg font-medium ${spectator.status === 'Active' ? 'text-green-600' : 'text-red-600'}`}>
+            {spectator.status}
           </p>
         </div>
       </div>

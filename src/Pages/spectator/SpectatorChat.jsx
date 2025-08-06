@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-export default function InspectorChat() {
+export default function SpectatorChat() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -14,7 +14,7 @@ export default function InspectorChat() {
 
   const handleSend = () => {
     if (newMessage.trim() === '') return;
-    setMessages([...messages, { from: 'inspector', text: newMessage }]);
+    setMessages([...messages, { from: 'spectator', text: newMessage }]);
     setNewMessage('');
   };
 

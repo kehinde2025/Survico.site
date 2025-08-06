@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
-export default function InspectorDashboard() {
-  const [inspectorData, setInspectorData] = useState({
-    name: 'Inspector Joe',
+export default function SpectatorDashboard() {
+  const [spectatorData, setSpectatorData] = useState({
+    name: 'spectator Joe',
     tasksReviewed: 35,
     tasksPending: 5,
     totalPointsApproved: 200,
@@ -15,27 +15,27 @@ export default function InspectorDashboard() {
 
   useEffect(() => {
     // ✅ Replace this with real backend later
-    // Example: fetch(`/api/inspector/dashboard`)
+    // Example: fetch(`/api/spectator/dashboard`)
   }, []);
 
   return (
     <div className="p-6 space-y-6">
       <h2 className="text-2xl font-bold text-gray-800">
-        👀 Welcome, {inspectorData.name}
+        👀 Welcome, {spectatorData.name}
       </h2>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-lg shadow p-4 text-center">
           <h3 className="text-sm text-gray-500">Tasks Reviewed</h3>
-          <p className="text-xl font-bold text-blue-700">{inspectorData.tasksReviewed}</p>
+          <p className="text-xl font-bold text-blue-700">{spectatorData.tasksReviewed}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4 text-center">
           <h3 className="text-sm text-gray-500">Pending Reviews</h3>
-          <p className="text-xl font-bold text-yellow-600">{inspectorData.tasksPending}</p>
+          <p className="text-xl font-bold text-yellow-600">{spectatorData.tasksPending}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4 text-center">
           <h3 className="text-sm text-gray-500">Total Points Approved</h3>
-          <p className="text-xl font-bold text-green-700">{inspectorData.totalPointsApproved}</p>
+          <p className="text-xl font-bold text-green-700">{spectatorData.totalPointsApproved}</p>
         </div>
       </div>
 

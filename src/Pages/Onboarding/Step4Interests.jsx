@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function Step4Interests({ prevStep, data, updateForm }) {
   const navigate = useNavigate();
@@ -34,22 +35,38 @@ export default function Step4Interests({ prevStep, data, updateForm }) {
     setLocal({ ...local, [e.target.name]: e.target.value });
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    // Update parent with final local step data
     updateForm(local);
 
-    // TODO: Save formData to backend here
-    console.log('Final Onboarding Data:', { ...data, ...local });
+    const finalData = { ...data, ...local };
 
-    navigate('/dashboard');
+    console.log('✅ Final onboarding data:', finalData);
+
+    try {
+      const token = localStorage.getItem('token');
+
+      const res = await axios.post(
+        'http://localhost:5000/api/auth/complete-profile',
+        finalData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log('✅ Backend onboarding complete:', res.data);
+
+      // Mark onboarding complete in localStorage if needed
+      localStorage.setItem('onboardingComplete', 'true');
+
+      // Redirect to dashboard
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('❌ Onboarding save error:', err);
+    }
   };
-
-  // ✅ FINAL SUBMIT BUTTON HANDLER
-const handleSubmit = () => {
-  // Save to backend or localStorage if needed
-  localStorage.setItem('onboardingComplete', 'true');
-  navigate('/dashboard');
-};
-
 
   return (
     <div className="space-y-4">

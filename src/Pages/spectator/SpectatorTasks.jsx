@@ -1,7 +1,7 @@
 // src/Pages/inspector/InspectorTasks.jsx
 import { useEffect, useState } from 'react';
 
-export default function InspectorTasks() {
+export default function SpectatorTasks() {
   const [tasks, setTasks] = useState([
     { id: 1, name: 'Review Survey A', status: 'Pending' },
     { id: 2, name: 'Verify Withdrawal #102', status: 'Approved' },

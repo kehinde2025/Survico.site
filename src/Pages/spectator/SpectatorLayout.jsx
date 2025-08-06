@@ -2,16 +2,16 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
-export default function InspectorLayout() {
+export default function SpectatorLayout() {
   const navigate = useNavigate();
 
-  const inspector = JSON.parse(localStorage.getItem('user')) || {};
+  const spectator = JSON.parse(localStorage.getItem('user')) || {};
 
   useEffect(() => {
-    if (inspector.role !== 'inspector') {
+    if (spectator.role !== 'spectator') {
       navigate('/login');
     }
-  }, [inspector.role, navigate]);
+  }, [spectator.role, navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -24,34 +24,34 @@ export default function InspectorLayout() {
       <aside className="w-64 bg-[#140932] text-white flex flex-col">
         <div className="p-6 border-b border-[#1f1445]">
           <div className="text-2xl font-bold mb-2">Survico Inspector</div>
-          <div className="text-sm text-gray-300">{inspector.name || 'Inspector'}</div>
-          <div className="text-xs text-gray-400">{inspector.email || ''}</div>
+          <div className="text-sm text-gray-300">{spectator.name || 'Spectator'}</div>
+          <div className="text-xs text-gray-400">{spectator.email || ''}</div>
         </div>
 
         <nav className="flex-1 px-4 py-4 space-y-2">
           <Link
-            to="/inspector/dashboard"
+            to="/spectator/dashboard"
             className="block px-3 py-2 rounded hover:bg-[#1e1145]"
           >
             🏠 Dashboard
           </Link>
 
           <Link
-            to="/inspector/chat"
+            to="/spectator/chat"
             className="block px-3 py-2 rounded hover:bg-[#1e1145]"
           >
             💬 Chat with Users
           </Link>
 
           <Link
-            to="/inspector/tasks"
+            to="/spectator/tasks"
             className="block px-3 py-2 rounded hover:bg-[#1e1145]"
           >
             ✅ Review Tasks
           </Link>
 
           <Link
-            to="/inspector/profile"
+            to="/spectator/profile"
             className="block px-3 py-2 rounded hover:bg-[#1e1145]"
           >
             ⚙️ Profile Settings

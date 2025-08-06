@@ -12,8 +12,7 @@ import Opportunities from './Pages/Opportunities';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
-// User
-import DashboardLayout from './components/DashBoardLayout';
+// User'
 import DashboardHome from './Pages/dashboard/DashboardHome';
 import Survey from './Pages/dashboard/Survey';
 import Offers from './Pages/dashboard/Offers';
@@ -33,22 +32,22 @@ import ReferralViews from './Pages/admin/ReferralViews';
 import AdminLeaderboard from './Pages/admin/Leaderboard';
 import Settings from './Pages/admin/Settings';
 import Tasks from './Pages/admin/Tasks';
-import AdminInspectors from './Pages/admin/AdminInspectors';
-import AddInspector from './Pages/admin/AddInspectors';
 
 // Inspector
-import InspectorDashboard from './Pages/inspector/InspectorDashboard';
-import InspectorChat from './Pages/inspector/InspectorChat';
-import InspectorTasks from './Pages/inspector/InspectorTasks';
-import InspectorProfile from './Pages/inspector/InspectorProfile';
-
+import SpectatorLayout from './Pages/spectator/SpectatorLayout';
+import SpectatorDashboard from './Pages/spectator/SpectatorDashboard';
+import SpectatorChat from './Pages/spectator/SpectatorChat';
+import SpectatorProfile from './Pages/spectator/SpectatorProfile';
 // Auth
 import ProtectedRoute from './components/ProtectedRoute';
-import InspectorLayout from './Pages/inspector/InspectorLayout';
 import AdminChat from './Pages/admin/Chat/AdminChat';
 import SupportChat from './Pages/dashboard/SupportChat';
 import PrivacyPolicy from './Pages/PrivacyPolicy';
 import TermsOfUse from './Pages/TermsOfUse';
+import AdminSpectators from './Pages/admin/AdminSpectators';
+import AddSpectators from './Pages/admin/AddSpectators';
+import DashboardLayout from './components/DashBoardLayout';
+import SpectatorTasks from './Pages/spectator/SpectatorTasks';
 
 
 export default function App() {
@@ -69,7 +68,7 @@ export default function App() {
         path="/dashboard"
         element={
           <ProtectedRoute allowedRoles={['user']}>
-            <DashboardLayout />
+            < DashboardLayout />
           </ProtectedRoute>
         }
       >
@@ -101,23 +100,23 @@ export default function App() {
         <Route path="tasks" element={<Tasks />} />
         <Route path="settings" element={<Settings />} />
         <Route path="chat" element={<AdminChat />} />
-        <Route path="inspectors" element={<AdminInspectors />} />
-        <Route path="inspectors/add" element={<AddInspector />} />
+        <Route path="spectators" element={<AdminSpectators />} />
+        <Route path="spectators/add" element={<AddSpectators />} />
       </Route>
 
       <Route
-        path="/inspector"
+        path="/spectator"
         element={
-          <ProtectedRoute allowedRoles={['inspector']}>
-            <InspectorLayout />
+          <ProtectedRoute allowedRoles={['spectator']}>
+            <SpectatorLayout />
           </ProtectedRoute>
         }
       >
-        <Route index element={<InspectorDashboard />} />
-        <Route path="dashboard" element={<InspectorDashboard />} />
-        <Route path="chat" element={<InspectorChat />} />
-        <Route path="tasks" element={<InspectorTasks />} />
-        <Route path="profile" element={<InspectorProfile />} />
+        <Route index element={<SpectatorDashboard />} />
+        <Route path="dashboard" element={<SpectatorDashboard />} />
+        <Route path="chat" element={<SpectatorChat />} />
+        <Route path="tasks" element={<SpectatorTasks />} />
+        <Route path="profile" element={<SpectatorProfile />} />
       </Route>
 
     </Routes>

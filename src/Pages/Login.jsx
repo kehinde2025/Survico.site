@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth, provider } from '../firebase'; // adjust the path if needed
+import { auth, provider } from '../firebase';
 import { signInWithPopup } from 'firebase/auth';
-import api from '../utils/api';
+import axios from 'axios';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -23,102 +23,85 @@ export default function Login() {
 
   const validate = () => {
     const newErrors = {};
-
     if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       newErrors.email = 'Enter a valid email';
     }
-
     if (!formData.password || formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoginError('');
 
     if (!validate()) return;
 
     try {
-      let role = 'user';
-      let userName = 'User Client';
+      const res = await axios.post('http://localhost:5000/api/auth/login', {
+        email: formData.email,
+        password: formData.password,
+      });
 
-      if (
-        formData.email === 'admin@gmail.com' &&
-        formData.password === 'admin123'
-      ) {
-        role = 'admin';
-        userName = 'Admin Boss';
-      } else if (
-        formData.email === 'inspector@gmail.com' &&
-        formData.password === 'inspect123'
-      ) {
-        role = 'inspector';
-        userName = 'Inspector Joe';
-      }
+      const { user, token } = res.data;
 
-      const token = 'dummy-token-123';
-
+      // ✅ Save token + user
       localStorage.setItem('token', token);
-      localStorage.setItem('role', role);
-      localStorage.setItem(
-        'user',
-        JSON.stringify({
-          email: formData.email,
-          role,
-          name: userName,
-        })
-      );
+      localStorage.setItem('user', JSON.stringify(user));
 
-      if (role === 'admin') {
+      // ✅ Redirect based on role
+      if (user.role === 'admin') {
         navigate('/admin/dashboard');
-      } else if (role === 'inspector') {
-        navigate('/inspector/dashboard');
+      } else if (user.role === 'spectator') {
+        navigate('/spectator/dashboard');
       } else {
-        const onboardingComplete = localStorage.getItem('onboardingComplete');
-        if (onboardingComplete === 'true') {
-          navigate('/dashboard');
-        } else {
-          navigate('/onboarding');
-        }
+        const onboarded = user.profileCompleted;
+        navigate(onboarded ? '/dashboard' : '/onboarding');
       }
+
     } catch (err) {
       console.error(err);
-      setLoginError('Invalid login. Please check your details.');
+      setLoginError(err.response?.data?.message || 'Invalid login.');
     }
   };
 
-  const handleGoogleSignIn = () => {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const user = result.user;
-        console.log('✅ Google User:', user);
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const googleUser = result.user;
 
-        // Example: store token or info
-        localStorage.setItem('token', user.accessToken);
-        localStorage.setItem('user', JSON.stringify({
-          email: user.email,
-          name: user.displayName,
-          photoURL: user.photoURL,
-        }));
-
-        // Redirect to dashboard or wherever
-        navigate('/dashboard');
-
-      })
-      .catch((error) => {
-        console.error('❌ Google Sign-In error:', error);
+      const res = await axios.post('http://localhost:5000/api/auth/google', {
+        name: googleUser.displayName,
+        email: googleUser.email,
       });
-  };
 
+      const { user, token } = res.data;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else if (user.role === 'spectator') {
+        navigate('/spectator/dashboard');
+      } else {
+        const onboarded = user.profileCompleted;
+        navigate(onboarded ? '/dashboard' : '/onboarding');
+      }
+
+    } catch (error) {
+      console.error(error);
+      setLoginError('Google login failed.');
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#140932] px-4">
       <div className="bg-[#685699] rounded-lg shadow-lg p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold text-white mb-6 text-center">
-          Welcome Back to Survico
+          Log In to Survico
         </h2>
 
         {loginError && (
@@ -132,29 +115,23 @@ export default function Login() {
             placeholder="Email address"
             value={formData.email}
             onChange={handleChange}
-            className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring ${errors.email ? 'border-red-500' : 'focus:ring-blue-300'
-              }`}
+            className={`w-full px-4 py-2 border rounded focus:outline-none ${errors.email ? 'border-red-500' : ''}`}
           />
-          {errors.email && (
-            <p className="text-sm text-red-500">{errors.email}</p>
-          )}
+          {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
 
           <input
             type="password"
             name="password"
-            placeholder="Enter your password"
+            placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring ${errors.password ? 'border-red-500' : 'focus:ring-blue-300'
-              }`}
+            className={`w-full px-4 py-2 border rounded focus:outline-none ${errors.password ? 'border-red-500' : ''}`}
           />
-          {errors.password && (
-            <p className="text-sm text-red-500">{errors.password}</p>
-          )}
+          {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
 
           <button
             type="submit"
-            className="w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800 transition"
+            className="w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800"
           >
             Log In
           </button>

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import api from '../../utils/axios';
 
-export default function AddInspector() {
+export default function AddSpectators() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [success, setSuccess] = useState('');
 
@@ -13,12 +13,12 @@ export default function AddInspector() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/admin/inspectors', form);
-      setSuccess('✅ Inspector created!');
+      await api.post('/admin/spectators', form);
+      setSuccess('✅ Spectator created!');
       setForm({ name: '', email: '', password: '' });
     } catch (err) {
       console.error(err);
-      alert('Failed to create inspector.');
+      alert('Failed to create spectator.');
     }
   };
 

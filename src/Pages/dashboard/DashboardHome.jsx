@@ -4,10 +4,9 @@ import { Bell, RefreshCw, AlertCircle } from 'lucide-react';
 import api from '../../utils/axios';
 
 export default function DashboardHome() {
-  // Initialize with zero values
   const [dashboardData, setDashboardData] = useState({
     user: {
-      name: 'User', // Default name
+      name: 'Loading...',
       earnings: 0,
       tasksCompleted: 0,
       referrals: 0,
@@ -16,30 +15,6 @@ export default function DashboardHome() {
     topSurveys: [],
     topOffers: []
   });
-
-  // In your DashboardHome.js:
-  useEffect(() => {
-    api.get('/api/surveys/top')
-      .then(res => setTopSurveys(res.data))
-      .catch(/* error handling */);
-  }, []);
-
-  // When clicking "Start Survey":
- const handleCompleteSurvey = async (surveyId) => {
-  try {
-    const response = await api.post(`/api/dashboard/surveys/${surveyId}/complete`);
-    console.log(`+1 Point! Total: ${response.data.points}`);
-    // Update UI state
-    setUserData(prev => ({
-      ...prev,
-      points: prev.points + 1,
-      balance: prev.balance + survey.reward,
-      tasksCompleted: prev.tasksCompleted + 1
-    }));
-  } catch (err) {
-    console.error('Completion error:', err.response?.data?.error || err.message);
-  }
-};
 
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(null);
@@ -51,15 +26,20 @@ export default function DashboardHome() {
     setApiError(null);
 
     try {
+      const token = localStorage.getItem('token');
+
       const [userRes, surveysRes, offersRes] = await Promise.all([
-        api.get('/user/stats').catch(() => ({ data: null })), // Graceful fallback
-        api.get('/surveys/top').catch(() => ({ data: [] })), // Return empty array on error
-        api.get('/offers/top').catch(() => ({ data: [] }))   // Return empty array on error
+        api.get('/api/user/me', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        }).catch(() => ({ data: {} })),
+
+        api.get('/api/surveys/top').catch(() => ({ data: [] })),
+        api.get('/api/offers/top').catch(() => ({ data: [] }))
       ]);
 
       setDashboardData({
         user: {
-          name: userRes.data?.name || 'User',
+          name: userRes.data?.name || '',
           earnings: userRes.data?.balance || 0,
           tasksCompleted: userRes.data?.tasksCompleted || 0,
           referrals: userRes.data?.referrals || 0,
@@ -80,7 +60,6 @@ export default function DashboardHome() {
   useEffect(() => {
     fetchData();
 
-    // Fetch notifications separately (non-critical)
     api.get('/notifications')
       .then(res => setNotifications(res.data))
       .catch(err => console.error('Notifications error:', err));
@@ -96,7 +75,7 @@ export default function DashboardHome() {
 
   return (
     <div className="max-w-md mx-auto space-y-6 pb-16">
-      {/* Error Banner (if any) */}
+      {/* Error Banner */}
       {apiError && (
         <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 flex items-start">
           <AlertCircle className="h-5 w-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
@@ -149,7 +128,7 @@ export default function DashboardHome() {
         </div>
       </div>
 
-      {/* Stats Grid - Always shows, even with zeros */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-white rounded-lg shadow p-4 text-center border-t-4 border-blue-500">
           <h2 className="text-sm text-gray-500">Earnings</h2>

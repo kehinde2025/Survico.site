@@ -2,20 +2,20 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../utils/axios'; // adjust your path
 
-export default function AdminInspectors() {
-  const [inspectors, setInspectors] = useState([]);
+export default function AdminSpectators() {
+  const [spectators, setSpectators] = useState([]);
 
   useEffect(() => {
-    async function fetchInspectors() {
+    async function fetchSpectators() {
       try {
-        const res = await api.get('/admin/inspectors');
+        const res = await api.get('/admin/spectators');
         setInspectors(res.data);
       } catch (err) {
-        console.error('Failed to fetch inspectors:', err);
+        console.error('Failed to fetch spectators:', err);
         // Fallback dummy
         setInspectors([
-          { id: 1, name: 'Inspector Joe', email: 'joe@example.com', status: 'active' },
-          { id: 2, name: 'Inspector Mary', email: 'mary@example.com', status: 'suspended' },
+          { id: 1, name: 'Spectator Joe', email: 'joe@example.com', status: 'active' },
+          { id: 2, name: 'Spectator Mary', email: 'mary@example.com', status: 'suspended' },
         ]);
       }
     }
@@ -23,13 +23,13 @@ export default function AdminInspectors() {
     fetchInspectors();
   }, []);
 
-  async function toggleStatus(inspectorId, currentStatus) {
+  async function toggleStatus(spectatorId, currentStatus) {
     try {
       const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
-      await api.post(`/admin/inspectors/${inspectorId}/status`, { status: newStatus });
-      setInspectors((prev) =>
-        prev.map((insp) =>
-          insp.id === inspectorId ? { ...insp, status: newStatus } : insp
+      await api.post(`/admin/spectators/${spectatorId}/status`, { status: newStatus });
+      setSpectators((prev) =>
+        prev.map((spec) =>
+          spec.id === spectatorId ? { ...spec, status: newStatus } : spec
         )
       );
     } catch (err) {
@@ -41,12 +41,12 @@ export default function AdminInspectors() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">🕵️ Inspectors</h2>
+        <h2 className="text-2xl font-bold text-gray-800">🕵️ Spectators</h2>
         <Link
-          to="/admin/inspectors/add"
+          to="/admin/spectators/add"
           className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
-          ➕ Add Inspector
+          ➕ Add Spectator
         </Link>
       </div>
 
@@ -61,7 +61,7 @@ export default function AdminInspectors() {
           </tr>
         </thead>
         <tbody>
-          {inspectors.map((inspector, index) => (
+          {spectators.map((spectator, index) => (
             <tr key={inspector.id} className="border-b hover:bg-gray-50">
               <td className="px-4 py-2">{index + 1}</td>
               <td className="px-4 py-2">{inspector.name}</td>
