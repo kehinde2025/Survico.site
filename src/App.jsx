@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import ProtectedRoute from './components/ProtectedRoute';
-import DashboardLayout from './components/DashBoardLayout';
+import DashboardLayout from './components/DashboardLayout';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
