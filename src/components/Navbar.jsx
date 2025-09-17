@@ -17,7 +17,7 @@ export default function Navbar() {
     
 
     return (
-        <nav className="bg-[#140932] shadow-md px-3 py-2 fixed top-0 left-0 w-full z-30">
+        <nav className="bg-[#140932] shadow-md px-3 py-2 fixed top-0 left-0 w-full z-30 p-10">
             <div className="max-w-7xl mx-auto flex justify-between items-center ">
 
                 {/* Logo */}

@@ -5,20 +5,22 @@ import { Bell, RefreshCw, AlertCircle } from "lucide-react";
 import api from "../../utils/axios";
 
 export default function DashboardHome() {
-  const [user, setUser] = useState({
-    name: "",
-    earnings: 0,
-    tasksCompleted: 0,
-    referrals: 0,
-    points: 0,
+  const [dashboardData, setDashboardData] = useState({
+    user: {
+      name: "Loading...",
+      earnings: 0,
+      tasksCompleted: 0,
+      referrals: 0,
+      points: 0,
+    },
+    topSurveys: [],
+    topOffers: [],
   });
-  const [topSurveys, setTopSurveys] = useState([]);
-  const [topOffers, setTopOffers] = useState([]);
-  const [notifications, setNotifications] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
   // Fetch dashboard data
   const fetchDashboardData = async () => {
@@ -26,28 +28,28 @@ export default function DashboardHome() {
     setApiError(null);
 
     try {
-      const token = localStorage.getItem("token");
-      const userId = localStorage.getItem("userId");
-
-      // ✅ Fetch user, surveys, offers
       const [userRes, surveysRes, offersRes] = await Promise.all([
-        api.get(`/api/user/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        api
+          .get("/api/user/me", {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          })
+          .catch(() => ({ data: {} })),
+
         api.get("/api/surveys/top").catch(() => ({ data: [] })),
-        api.get("/api/offerwall/top").catch(() => ({ data: [] })), // ✅ correct endpoint
+        api.get("/api/offers/top").catch(() => ({ data: [] })),
       ]);
 
-      setUser({
-        name: userRes.data?.name || "User",
-        earnings: userRes.data?.balance || 0,
-        tasksCompleted: userRes.data?.tasksCompleted || 0,
-        referrals: userRes.data?.referrals || 0,
-        points: userRes.data?.points || 0,
+      setDashboardData({
+        user: {
+          name: userRes.data?.name || "",
+          earnings: userRes.data?.balance || 0,
+          tasksCompleted: userRes.data?.tasksCompleted || 0,
+          referrals: userRes.data?.referrals || 0,
+          points: userRes.data?.points || 0,
+        },
+        topSurveys: surveysRes.data || [],
+        topOffers: offersRes.data || [],
       });
-
-      setTopSurveys(surveysRes.data || []);
-      setTopOffers(offersRes.data || []);
     } catch (err) {
       console.error("Dashboard fetch error:", err);
       setApiError("Could not load dashboard data.");
@@ -56,12 +58,11 @@ export default function DashboardHome() {
     }
   };
 
-  // Fetch notifications separately
+  // Fetch notifications
   const fetchNotifications = async () => {
     try {
-      const token = localStorage.getItem("token");
       const res = await api.get("/api/notifications", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setNotifications(res.data);
     } catch (err) {
@@ -75,7 +76,12 @@ export default function DashboardHome() {
     fetchNotifications();
   }, []);
 
+  const handleRetry = () => {
+    fetchDashboardData();
+  };
+
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const { user, topSurveys, topOffers } = dashboardData;
   const dollarsFromPoints = (user.points / 100).toFixed(2);
 
   return (
@@ -83,15 +89,15 @@ export default function DashboardHome() {
       {/* Error Banner */}
       {apiError && (
         <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 flex items-start">
-          <AlertCircle className="h-5 w-5 text-red-500 mr-2 mt-0.5" />
+          <AlertCircle className="h-5 w-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-red-500 text-sm">{apiError}</p>
             <button
-              onClick={fetchDashboardData}
+              onClick={handleRetry}
               className="text-red-500 hover:text-red-400 text-xs underline flex items-center mt-1"
             >
               <RefreshCw className="h-3 w-3 mr-1" />
-              Retry
+              Refresh data
             </button>
           </div>
         </div>
@@ -101,7 +107,7 @@ export default function DashboardHome() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">
-            Welcome back, {user.name} 👋
+            Welcome back, {user.name || "Guest"} 👋
           </h1>
           <p className="text-gray-400">Let’s earn more today!</p>
         </div>
@@ -138,13 +144,17 @@ export default function DashboardHome() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-4">
-        <StatCard label="Earnings" value={`$${user.earnings.toFixed(2)}`} color="blue" />
+        <StatCard
+          label="Earnings"
+          value={`$${user.earnings.toFixed(2)}`}
+          color="blue"
+        />
         <StatCard label="Tasks Completed" value={user.tasksCompleted} color="green" />
         <StatCard
           label="Points"
           value={`${user.points} pts`}
-          color="yellow"
           sub={`(~$${dollarsFromPoints})`}
+          color="yellow"
         />
         <StatCard
           label="Referrals"
@@ -157,12 +167,12 @@ export default function DashboardHome() {
       {/* Top Surveys */}
       <Section title="🔥 Top Surveys">
         {topSurveys.length > 0 ? (
-          topSurveys.map((s) => (
+          topSurveys.map((survey) => (
             <ItemCard
-              key={s.id}
-              title={s.title}
-              reward={`$${s.reward}`}
-              link={`/dashboard/survey/${s.id}`}
+              key={survey.id}
+              title={survey.title}
+              reward={`$${survey.reward}`}
+              link={`/dashboard/survey/${survey.id}`}
               linkText="Start Survey →"
               color="blue"
             />
@@ -175,12 +185,12 @@ export default function DashboardHome() {
       {/* Top Offers */}
       <Section title="💎 Top Offers">
         {topOffers.length > 0 ? (
-          topOffers.map((o) => (
+          topOffers.map((offer) => (
             <ItemCard
-              key={o.id}
-              title={o.title}
-              reward={`$${o.reward}`}
-              link={`/dashboard/offers/${o.id}`}
+              key={offer.id}
+              title={offer.title}
+              reward={`$${offer.reward}`}
+              link={`/dashboard/offers/${offer.id}`}
               linkText="View Offer →"
               color="green"
             />
@@ -204,7 +214,9 @@ function StatCard({ label, value, color, sub, link }) {
   };
 
   return (
-    <div className={`bg-white rounded-lg shadow p-4 text-center border-t-4 ${colors[color]}`}>
+    <div
+      className={`bg-white rounded-lg shadow p-4 text-center border-t-4 ${colors[color]}`}
+    >
       <h2 className="text-sm text-gray-500">{label}</h2>
       <p className="text-xl font-bold">{value}</p>
       {sub && <p className="text-sm text-gray-600">{sub}</p>}

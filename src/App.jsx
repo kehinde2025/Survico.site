@@ -5,6 +5,9 @@ import DashboardLayout from './components/DashboardLayout';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
+import { Toaster } from "react-hot-toast";
+
+
 // Lazy load pages
 const Home = lazy(() => import('./Pages/Home'));
 const About = lazy(() => import('./Pages/About'));
@@ -50,7 +53,7 @@ const SpectatorTasks = lazy(() => import('./Pages/spectator/SpectatorTasks'));
 // Public layout wrapper
 const PublicLayout = ({ children }) => (
   <>
-    <Navbar />
+    <Navbar /> 
     {children}
     <Footer />
   </>
@@ -58,11 +61,29 @@ const PublicLayout = ({ children }) => (
 
 export default function App() {
   return (
-    <Suspense fallback={<div className="text-center py-10 text-white">Loading...</div>}>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
-        <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
+    <>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            fontSize: "14px",
+            borderRadius: "8px",
+            padding: "10px 15px",
+          },
+          success: {
+            style: { background: "#22c55e", color: "#fff" },
+          },
+          error: {
+            style: { background: "#ef4444", color: "#fff" },
+          },
+        }}
+      />
+      <Suspense fallback={<div className="text-center py-10 text-white">Loading...</div>}>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+          <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
         <Route path="/opportunities" element={<PublicLayout><Opportunities /></PublicLayout>} />
         <Route path="/referral" element={<PublicLayout><Referral /></PublicLayout>} />
         <Route path="/signup" element={<PublicLayout><SignUp /></PublicLayout>} />
@@ -133,5 +154,6 @@ export default function App() {
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>
     </Suspense>
+    </>
   );
 }

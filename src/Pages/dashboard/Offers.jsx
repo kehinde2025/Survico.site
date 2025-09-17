@@ -1,6 +1,6 @@
 // src/pages/dashboard/Offers.jsx
 import { useEffect, useState } from "react";
-import API_BASE_URL from "../../config"; // adjust path if needed
+import API_BASE_URL from "../../config"; // ✅ use config.js
 
 export default function Offers() {
   const [offers, setOffers] = useState([]);
@@ -20,7 +20,6 @@ export default function Offers() {
         setLoading(false);
       }
     }
-
     fetchOffers();
   }, [userId]);
 
@@ -38,7 +37,7 @@ export default function Offers() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {offers.map((offer) => (
             <a
-              key={offer.id}
+              key={offer.id} // ✅ stick with offer.id
               href={offer.link}
               target="_blank"
               rel="noopener noreferrer"

@@ -7,6 +7,8 @@ export default function Withdrawal() {
     bankName: '',
     accountNumber: '',
     usdtAddress: '',
+    giftCardType: '',
+    giftCardEmail: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -15,9 +17,9 @@ export default function Withdrawal() {
     { id: 2, amount: 7, method: 'Bank', status: 'Pending', date: '2025-07-01' },
   ]);
 
-  const [userPoints, setUserPoints] = useState(120); // Example points balance
+  const [userPoints, setUserPoints] = useState(120);
   const [convertPoints, setConvertPoints] = useState('');
-  const [balance, setBalance] = useState(22.5); // USD balance for payout
+  const [balance, setBalance] = useState(22.5);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -46,7 +48,12 @@ export default function Withdrawal() {
         {
           id: Date.now(),
           amount,
-          method: method === 'usdt' ? 'USDT' : 'Bank',
+          method:
+            method === 'usdt'
+              ? 'USDT'
+              : method === 'bank'
+              ? 'Bank'
+              : 'Gift Card',
           status: 'Pending',
           date: new Date().toISOString().split('T')[0],
         },
@@ -60,6 +67,8 @@ export default function Withdrawal() {
         bankName: '',
         accountNumber: '',
         usdtAddress: '',
+        giftCardType: '',
+        giftCardEmail: '',
       });
     }, 1500);
   };
@@ -76,7 +85,7 @@ export default function Withdrawal() {
       return;
     }
 
-    const usd = pts / 100; // 100 pts = $1
+    const usd = pts / 100;
 
     setUserPoints(userPoints - pts);
     setBalance(balance + usd);
@@ -89,9 +98,11 @@ export default function Withdrawal() {
       <h2 className="text-2xl font-bold text-blue-700 text-center">💸 Withdrawal</h2>
 
       <div className="text-center text-sm text-gray-600">
-        Available Balance: <span className="font-bold text-green-600">${balance.toFixed(2)}</span>
+        Available Balance:{' '}
+        <span className="font-bold text-green-600">${balance.toFixed(2)}</span>
       </div>
 
+      {/* Convert Points */}
       <div className="bg-white p-4 rounded shadow space-y-4">
         <h3 className="font-bold text-gray-700">Convert Points to USD</h3>
         <p className="text-sm text-gray-600">
@@ -118,6 +129,7 @@ export default function Withdrawal() {
         </div>
       )}
 
+      {/* Withdrawal Form */}
       <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded shadow">
         <div>
           <label className="block text-sm mb-1">Amount (USD)</label>
@@ -141,9 +153,11 @@ export default function Withdrawal() {
           >
             <option value="usdt">USDT (TRC20)</option>
             <option value="bank">Bank Transfer</option>
+            <option value="giftcard">Gift Card</option>
           </select>
         </div>
 
+        {/* Bank Fields */}
         {method === 'bank' && (
           <>
             <div>
@@ -171,6 +185,7 @@ export default function Withdrawal() {
           </>
         )}
 
+        {/* USDT Fields */}
         {method === 'usdt' && (
           <div>
             <label className="block text-sm mb-1">USDT Wallet Address (TRC20)</label>
@@ -183,6 +198,40 @@ export default function Withdrawal() {
               required
             />
           </div>
+        )}
+
+        {/* Gift Card Fields */}
+        {method === 'giftcard' && (
+          <>
+            <div>
+              <label className="block text-sm mb-1">Gift Card Type</label>
+              <select
+                name="giftCardType"
+                value={form.giftCardType}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border rounded"
+                required
+              >
+                <option value="">Select Gift Card</option>
+                <option value="Amazon">Amazon</option>
+                <option value="iTunes">iTunes</option>
+                <option value="Google Play">Google Play</option>
+                <option value="Steam">Steam</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm mb-1">Recipient Email</label>
+              <input
+                type="email"
+                name="giftCardEmail"
+                value={form.giftCardEmail}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border rounded"
+                placeholder="Enter email to receive gift card"
+                required
+              />
+            </div>
+          </>
         )}
 
         <button
@@ -200,6 +249,7 @@ export default function Withdrawal() {
         💡 <strong>Note:</strong> Minimum withdrawal is <strong>$5</strong>. Requests are processed within 24–48 hours.
       </div>
 
+      {/* Withdrawal History */}
       <div className="bg-white rounded shadow p-4 mt-6">
         <h3 className="text-md font-bold mb-3 text-gray-800">🧾 Withdrawal History</h3>
         {history.length === 0 ? (

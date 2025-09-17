@@ -1,10 +1,9 @@
-// src/Pages/Login.jsx
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, provider } from '../firebase';
 import { signInWithPopup } from 'firebase/auth';
 import axios from 'axios';
+import toast from "react-hot-toast";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -36,22 +35,24 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoginError('');
-
     if (!validate()) return;
 
+    const loadingToast = toast.loading("Logging you in...");
+
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', {
+      const res = await axios.post(`https://survico-backend.up.railway.app/api/surveys?userId=${userId}`, {
         email: formData.email,
         password: formData.password,
       });
 
       const { user, token } = res.data;
 
-      // ✅ Save token + user
+      toast.dismiss(loadingToast);
+      toast.success(`👋 Welcome back, ${user.name}!`);
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
 
-      // ✅ Redirect based on role
       if (user.role === 'admin') {
         navigate('/admin/dashboard');
       } else if (user.role === 'spectator') {
@@ -60,14 +61,16 @@ export default function Login() {
         const onboarded = user.profileCompleted;
         navigate(onboarded ? '/dashboard' : '/onboarding');
       }
-
     } catch (err) {
-      console.error(err);
-      setLoginError(err.response?.data?.message || 'Invalid login.');
+      toast.dismiss(loadingToast);
+      const msg = err.response?.data?.message || 'Invalid login.';
+      setLoginError(msg);
+      toast.error(msg);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    const loadingToast = toast.loading("Logging in with Google...");
     try {
       const result = await signInWithPopup(auth, provider);
       const googleUser = result.user;
@@ -79,8 +82,15 @@ export default function Login() {
 
       const { user, token } = res.data;
 
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      toast.dismiss(loadingToast);
+      toast.success("✅ Google login successful!");
+
+      // Save token
+      localStorage.setItem("token", res.data.token);
+
+      // Save user object (name, email, etc.)
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
 
       if (user.role === 'admin') {
         navigate('/admin/dashboard');
@@ -90,10 +100,10 @@ export default function Login() {
         const onboarded = user.profileCompleted;
         navigate(onboarded ? '/dashboard' : '/onboarding');
       }
-
     } catch (error) {
-      console.error(error);
+      toast.dismiss(loadingToast);
       setLoginError('Google login failed.');
+      toast.error('Google login failed.');
     }
   };
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth, provider } from '../firebase'; // ✅ correct path
+import { auth, provider } from '../firebase';
 import { signInWithPopup } from 'firebase/auth';
 import axios from 'axios';
+import toast from "react-hot-toast";
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -44,52 +45,57 @@ export default function SignUp() {
     setApiError('');
     if (!validate()) return;
 
+    const loadingToast = toast.loading("Creating your account...");
+
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/register', {
+      const res = await axios.post(`https://survico-backend.up.railway.app/api/surveys?userId=${userId}`, {
         name: formData.fullName,
         email: formData.email,
         password: formData.password,
         phone: formData.phoneNumber,
-        referrerId: formData.referrerId || null, // ✅ fallback to null if not provided
+        referrerId: formData.referrerId || null,
       });
 
-      console.log('✅ Registration success:', res.data);
+      toast.dismiss(loadingToast);
+      toast.success("🎉 Registration successful! Welcome to Survico.");
 
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
 
       navigate('/onboarding');
     } catch (err) {
-      console.error(err);
-      setApiError(err.response?.data?.message || 'Server error');
+      toast.dismiss(loadingToast);
+      const msg = err.response?.data?.message || 'Server error';
+      setApiError(msg);
+      toast.error(msg);
     }
   };
 
   const handleGoogleSignIn = async () => {
     setApiError('');
+    const loadingToast = toast.loading("Signing in with Google...");
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      console.log('✅ Google Firebase User:', user);
-
-      const res = await axios.post('http://localhost:5000/api/auth/google', {
+      const res = await axios.post('https://survico-backend.up.railway.app/api/auth/google', {
         name: user.displayName,
         email: user.email,
       });
 
-      console.log('✅ Google backend success:', res.data);
+      toast.dismiss(loadingToast);
+      toast.success("✅ Google Sign-In successful!");
 
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
 
       navigate('/onboarding');
     } catch (error) {
-      console.error('❌ Google Sign-In error:', error);
+      toast.dismiss(loadingToast);
       setApiError('Google Sign-In failed. Please try again.');
+      toast.error('Google Sign-In failed. Please try again.');
     }
   };
-
 
   return (
     <div className="min-h-screen bg-[#140932] flex items-center justify-center px-4">
