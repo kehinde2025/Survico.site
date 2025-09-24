@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://kehinde2025.github.io/Survico.com",
+  "homepage": "https://kehinde2025.github.io/Survico.site",
   "description": "A survey platform for collecting and analyzing data.",
   "author": "isaac kehinde",
   "scripts": {
@@ -44,4 +44,5 @@
     "engines": {
   "node": "20.x"
 }
+
 }
