@@ -1,79 +1,65 @@
-import { useEffect, useState } from 'react';
+// src/pages/dashboard/Offers.jsx
+import { useEffect, useState } from "react";
+import API_BASE_URL from "../../config"; // adjust path if needed
 
 export default function Offers() {
   const [offers, setOffers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const userId = localStorage.getItem("userId") || "guest";
 
   useEffect(() => {
-    // Combined offers (apps + CPA tasks)
-    setOffers([
-      {
-        id: 1,
-        title: 'Sign Up on Finz Wallet',
-        reward: 200,
-        description: 'Register on Finz Wallet and complete your KYC.',
-        link: 'https://example.com/finz',
-        type: 'Signup',
-      },
-      {
-        id: 2,
-        title: 'Install the Vuga App',
-        reward: 150,
-        description: 'Download and open the Vuga app for 2 minutes.',
-        link: 'https://example.com/vuga',
-        type: 'App',
-      },
-      {
-        id: 3,
-        title: 'Join SendWave',
-        reward: 250,
-        description: 'Create an account and verify your phone number.',
-        link: 'https://example.com/sendwave',
-        type: 'Signup',
-      },
-      {
-        id: 4,
-        title: 'Download Budget Pal',
-        reward: 220,
-        description: 'Install Budget Pal and set up a budget plan.',
-        link: 'https://example.com/budgetpal',
-        type: 'App',
-      },
-      {
-        id: 5,
-        title: 'Scan with QuickScan Pro',
-        reward: 150,
-        description: 'Install QuickScan Pro and scan a document.',
-        link: 'https://example.com/quickscan',
-        type: 'App',
-      },
-    ]);
-  }, []);
+    async function fetchOffers() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/offers?userId=${userId}`);
+        const data = await res.json();
+        setOffers(data);
+      } catch (err) {
+        console.error("Error fetching offers:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchOffers();
+  }, [userId]);
+
+  if (loading) return <p className="text-center text-gray-400">Loading offers...</p>;
 
   return (
-    <div className="max-w-md mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-white text-center">🎁 Earn From Offers & Apps</h1>
+    <div className="max-w-6xl mx-auto">
+      <h1 className="text-2xl font-bold text-white text-center mb-6">
+        🎁 Offerwalls
+      </h1>
 
       {offers.length === 0 ? (
-        <p className="text-center text-gray-500">No tasks available right now.</p>
+        <p className="text-center text-gray-500">No offerwalls available.</p>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {offers.map((offer) => (
-            <div
+            <a
               key={offer.id}
-              className="bg-white border border-green-100 rounded-lg p-4 shadow"
+              href={offer.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition"
             >
-              <h2 className="text-lg font-semibold text-green-700">{offer.title}</h2>
-              <p className="text-sm text-gray-600 mb-1">{offer.description}</p>
-              <p className="text-sm text-green-600 font-medium">Reward: ₦{offer.reward}</p>
-              <a
-                href={offer.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-3 inline-block w-full bg-green-600 text-white py-2 rounded text-center hover:bg-green-700 transition"
-              >
-                {offer.type === 'App' ? 'Download App' : 'Claim Offer'}
-              </a>
-            </div>
+              {offer.logo && (
+                <img
+                  src={offer.logo}
+                  alt={offer.name}
+                  className="h-12 mx-auto mb-3"
+                />
+              )}
+              <h2 className="text-lg font-semibold text-gray-800">
+                {offer.name}
+              </h2>
+              {offer.badge && (
+                <span className="inline-block mt-2 text-xs font-bold bg-purple-100 text-purple-700 px-2 py-1 rounded">
+                  {offer.badge}
+                </span>
+              )}
+            </a>
           ))}
         </div>
       )}
